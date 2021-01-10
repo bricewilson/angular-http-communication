@@ -1,5 +1,5 @@
-import { Book } from "app/models/book";
-import { Reader } from "app/models/reader";
+import { Book } from "./models/book";
+import { Reader } from "./models/reader";
 
 export const allReaders: Reader[] = [
     { readerID: 1, name: 'Marie', weeklyReadingGoal: 400, totalMinutesRead: 5600 },

@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { ErrorHandler, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AddBookComponent } from './add-book/add-book.component';
@@ -9,7 +9,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { EditBookComponent } from './edit-book/edit-book.component';
 import { EditReaderComponent } from './edit-reader/edit-reader.component';
-import { CoreModule } from './core/core.module';
+import { BookTrackerErrorHandlerService } from './core/book-tracker-error-handler.service';
 
 @NgModule({
   declarations: [
@@ -20,11 +20,13 @@ import { CoreModule } from './core/core.module';
     EditBookComponent,
     AddReaderComponent
   ],
+  providers: [
+    { provide: ErrorHandler, useClass: BookTrackerErrorHandlerService }
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule,
-    CoreModule
+    FormsModule
   ],
   bootstrap: [AppComponent]
 })
