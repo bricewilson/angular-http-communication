@@ -323,8 +323,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "mrSG");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "fXoL");
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/common/http */ "tk/3");
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ "kU1M");
-/* harmony import */ var app_data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! app/data */ "AVqD");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs */ "qCKp");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs/operators */ "kU1M");
+/* harmony import */ var app_data__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! app/data */ "AVqD");
+/* harmony import */ var app_models_bookTrackerError__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! app/models/bookTrackerError */ "+5Uy");
+
+
 
 
 
@@ -333,20 +337,28 @@ __webpack_require__.r(__webpack_exports__);
 let DataService = class DataService {
     constructor(http) {
         this.http = http;
-        this.mostPopularBook = app_data__WEBPACK_IMPORTED_MODULE_4__["allBooks"][0];
+        this.mostPopularBook = app_data__WEBPACK_IMPORTED_MODULE_5__["allBooks"][0];
     }
     setMostPopularBook(popularBook) {
         this.mostPopularBook = popularBook;
     }
     getAllReaders() {
-        return app_data__WEBPACK_IMPORTED_MODULE_4__["allReaders"];
+        return app_data__WEBPACK_IMPORTED_MODULE_5__["allReaders"];
     }
     getReaderById(id) {
-        return app_data__WEBPACK_IMPORTED_MODULE_4__["allReaders"].find(reader => reader.readerID === id);
+        return app_data__WEBPACK_IMPORTED_MODULE_5__["allReaders"].find(reader => reader.readerID === id);
     }
     getAllBooks() {
         console.log('Getting all books from the server.');
-        return this.http.get('/api/books');
+        return this.http.get('/api/books')
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(err => this.handleHttpError(err)));
+    }
+    handleHttpError(error) {
+        let dataError = new app_models_bookTrackerError__WEBPACK_IMPORTED_MODULE_6__["BookTrackerError"]();
+        dataError.errorNumber = 100;
+        dataError.message = error.statusText;
+        dataError.friendlyMessage = 'An error occurred retrieving data.';
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["throwError"])(dataError);
     }
     getBookById(id) {
         return this.http.get(`/api/books/${id}`, {
@@ -358,10 +370,10 @@ let DataService = class DataService {
     }
     getOldBookById(id) {
         return this.http.get(`/api/books/${id}`)
-            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(b => ({
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["map"])(b => ({
             bookTitle: b.title,
             year: b.publicationYear
-        })), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(classicBook => console.log(classicBook)));
+        })), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["tap"])(classicBook => console.log(classicBook)));
     }
     addBook(newBook) {
         return this.http.post('/api/books', newBook, {
@@ -408,20 +420,30 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _raw_loader_dashboard_component_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! raw-loader!./dashboard.component.html */ "H/d9");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ "fXoL");
 /* harmony import */ var _angular_platform_browser__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/platform-browser */ "jhN1");
-/* harmony import */ var app_core_data_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! app/core/data.service */ "QVKM");
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ "tyNb");
+/* harmony import */ var app_core_data_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! app/core/data.service */ "QVKM");
+/* harmony import */ var app_models_bookTrackerError__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! app/models/bookTrackerError */ "+5Uy");
+
+
 
 
 
 
 
 let DashboardComponent = class DashboardComponent {
-    constructor(dataService, title) {
+    constructor(dataService, title, route) {
         this.dataService = dataService;
         this.title = title;
+        this.route = route;
     }
     ngOnInit() {
-        this.dataService.getAllBooks()
-            .subscribe((data) => this.allBooks = data, (err) => console.log(err), () => console.log('All done getting books.'));
+        let resolvedData = this.route.snapshot.data['resolvedBooks'];
+        if (resolvedData instanceof app_models_bookTrackerError__WEBPACK_IMPORTED_MODULE_6__["BookTrackerError"]) {
+            console.log(`Dashboard component error: ${resolvedData.friendlyMessage}`);
+        }
+        else {
+            this.allBooks = resolvedData;
+        }
         this.allReaders = this.dataService.getAllReaders();
         this.mostPopularBook = this.dataService.mostPopularBook;
         this.title.setTitle(`Book Tracker`);
@@ -438,8 +460,9 @@ let DashboardComponent = class DashboardComponent {
     }
 };
 DashboardComponent.ctorParameters = () => [
-    { type: app_core_data_service__WEBPACK_IMPORTED_MODULE_4__["DataService"] },
-    { type: _angular_platform_browser__WEBPACK_IMPORTED_MODULE_3__["Title"] }
+    { type: app_core_data_service__WEBPACK_IMPORTED_MODULE_5__["DataService"] },
+    { type: _angular_platform_browser__WEBPACK_IMPORTED_MODULE_3__["Title"] },
+    { type: _angular_router__WEBPACK_IMPORTED_MODULE_4__["ActivatedRoute"] }
 ];
 DashboardComponent = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"])([
     Object(_angular_core__WEBPACK_IMPORTED_MODULE_2__["Component"])({
@@ -683,6 +706,48 @@ EditReaderComponent = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"])([
 
 /***/ }),
 
+/***/ "qT6J":
+/*!************************************************!*\
+  !*** ./src/app/core/books-resolver.service.ts ***!
+  \************************************************/
+/*! exports provided: BooksResolverService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BooksResolverService", function() { return BooksResolverService; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "mrSG");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "fXoL");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ "qCKp");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ "kU1M");
+/* harmony import */ var app_core_data_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! app/core/data.service */ "QVKM");
+
+
+
+
+
+let BooksResolverService = class BooksResolverService {
+    constructor(dataService) {
+        this.dataService = dataService;
+    }
+    resolve(route, state) {
+        return this.dataService.getAllBooks()
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["catchError"])(err => Object(rxjs__WEBPACK_IMPORTED_MODULE_2__["of"])(err)));
+    }
+};
+BooksResolverService.ctorParameters = () => [
+    { type: app_core_data_service__WEBPACK_IMPORTED_MODULE_4__["DataService"] }
+];
+BooksResolverService = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"])([
+    Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Injectable"])({
+        providedIn: 'root'
+    })
+], BooksResolverService);
+
+
+
+/***/ }),
+
 /***/ "vY5A":
 /*!***************************************!*\
   !*** ./src/app/app-routing.module.ts ***!
@@ -701,6 +766,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var app_dashboard_dashboard_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! app/dashboard/dashboard.component */ "QX6l");
 /* harmony import */ var app_edit_book_edit_book_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! app/edit-book/edit-book.component */ "C9lS");
 /* harmony import */ var app_edit_reader_edit_reader_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! app/edit-reader/edit-reader.component */ "dkrA");
+/* harmony import */ var _core_books_resolver_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./core/books-resolver.service */ "qT6J");
+
 
 
 
@@ -710,7 +777,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const routes = [
-    { path: 'dashboard', component: app_dashboard_dashboard_component__WEBPACK_IMPORTED_MODULE_5__["DashboardComponent"] },
+    { path: 'dashboard', component: app_dashboard_dashboard_component__WEBPACK_IMPORTED_MODULE_5__["DashboardComponent"], resolve: { resolvedBooks: _core_books_resolver_service__WEBPACK_IMPORTED_MODULE_8__["BooksResolverService"] } },
     { path: 'addbook', component: app_add_book_add_book_component__WEBPACK_IMPORTED_MODULE_3__["AddBookComponent"] },
     { path: 'addreader', component: app_add_reader_add_reader_component__WEBPACK_IMPORTED_MODULE_4__["AddReaderComponent"] },
     { path: 'editreader/:id', component: app_edit_reader_edit_reader_component__WEBPACK_IMPORTED_MODULE_7__["EditReaderComponent"] },
