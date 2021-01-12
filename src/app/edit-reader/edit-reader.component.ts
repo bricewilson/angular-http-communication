@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Reader } from "../models/reader";
-import { DataService } from '../core/data.service';
-import { BadgeService } from '../core/badge.service';
+import { Reader } from "app/models/reader";
+import { DataService } from 'app/core/data.service';
+import { BadgeService } from 'app/core/badge.service';
 
 @Component({
   selector: 'app-edit-reader',

@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
-import { Book } from "../models/book";
-import { Reader } from "../models/reader";
-import { DataService } from '../core/data.service';
+import { Book } from "app/models/book";
+import { Reader } from "app/models/reader";
+import { DataService } from 'app/core/data.service';
 
 @Component({
   selector: 'app-dashboard',

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Reader } from "../models/reader";
+import { Reader } from "app/models/reader";
 
 @Component({
   selector: 'app-add-reader',
