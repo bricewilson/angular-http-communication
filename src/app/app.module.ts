@@ -12,6 +12,7 @@ import { EditBookComponent } from './edit-book/edit-book.component';
 import { EditReaderComponent } from './edit-reader/edit-reader.component';
 import { BookTrackerErrorHandlerService } from './core/book-tracker-error-handler.service';
 import { AddHeaderInterceptor } from './core/add-header.interceptor';
+import { LogResponseInterceptor } from './core/log-response.interceptor';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { AddHeaderInterceptor } from './core/add-header.interceptor';
   ],
   providers: [
     { provide: ErrorHandler, useClass: BookTrackerErrorHandlerService },
+    { provide: HTTP_INTERCEPTORS, useClass: LogResponseInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: AddHeaderInterceptor, multi: true }
   ],
   imports: [
