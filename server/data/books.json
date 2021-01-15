@@ -34,5 +34,11 @@
         "title": "Alice's Adventures in Wonderland",
         "author": "Lewis Carroll",
         "publicationYear": "1865"
+    },
+    {
+        "bookID": 7,
+        "title": "Corduroy",
+        "author": "Don Freeman",
+        "publicationYear": "1968"
     }
 ]
