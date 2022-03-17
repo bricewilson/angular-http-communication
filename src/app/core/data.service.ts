@@ -4,13 +4,15 @@ import { allBooks, allReaders } from 'app/data';
 import { Reader } from "app/models/reader";
 import { Book } from "app/models/book";
 import { BookTrackerError } from 'app/models/bookTrackerError';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   mostPopularBook: Book = allBooks[0];
 
@@ -26,11 +28,11 @@ export class DataService {
     return allReaders.find(reader => reader.readerID === id);
   }
 
-  getAllBooks(): Book[] {
-    return allBooks;
+  getAllBooks(): Observable<Book[]> {
+    return this.http.get<Book[]>('/api/books');
   }
 
   getBookById(id: number): Book {
     return allBooks.find(book => book.bookID === id);
-  }  
+  }
 }
