@@ -4,7 +4,7 @@ import { allBooks, allReaders } from 'app/data';
 import { Reader } from "app/models/reader";
 import { Book } from "app/models/book";
 import { BookTrackerError } from 'app/models/bookTrackerError';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -32,7 +32,12 @@ export class DataService {
     return this.http.get<Book[]>('/api/books');
   }
 
-  getBookById(id: number): Book {
-    return allBooks.find(book => book.bookID === id);
+  getBookById(id: number): Observable<Book> {
+    return this.http.get<Book>(`/api/books/${id}`, {
+      headers: new HttpHeaders({
+        'Accept': 'application/json',
+        'Authorization': 'my-toooooooken'
+      })
+    })
   }
 }
